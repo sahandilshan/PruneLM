@@ -18,7 +18,7 @@ class Bi_LSTM_Model:
         self.bi_lstm = nn.LSTM(embedding_dims, hidden_dims, num_layers,
                                bidirectional=True, dropout=dropout)
         # Since this is Bi-Directional, returns hidden_dims * 2 times parameters
-        self.decoder = nn.Linear(hidden_dims * 2, vocab_size)
+        self.output_layer = nn.Linear(hidden_dims * 2, vocab_size)
         self.init_weights()
         self.hidden_dims = hidden_dims
         self.num_layers = num_layers
@@ -26,22 +26,25 @@ class Bi_LSTM_Model:
     def init_weights(self):
         initrange = 0.1
         self.embedding.weight.data.uniform_(-initrange, initrange)
-        self.decoder.bias.data.zero_()
-        self.decoder.weight.data.uniform_(-initrange, initrange)
+        self.output_layer.bias.data.zero_()
+        self.output_layer.weight.data.uniform_(-initrange, initrange)
 
     def forward(self, input, hidden):
         emb = self.drop(self.embedding(input))
         self.bi_lstm.flatten_parameters()
         output, hidden = self.bi_lstm(emb, hidden)
         output = self.drop(output)
+        output_size_0 = output.shape(0)     # sequence size
+        output_size_1 = output.shape(1)     # batch size
+        output_size_2 = output.shape(2)     # hidden_size
 
-        # shape: {(seq * batch_size), hidden_steps} - hidden state contains
+        # shape: {(seq * batch_size), hidden_dims} - hidden state contains
         # num_directions * hidden_size
-        output_ = output.view(output.size(0) * output.size(1), output.size(2))
-        decoded = self.decoder(output_)
+        output = output.view(output_size_0 * output_size_1, output_size_2)
+        output = self.output_layer(output)
         # Converting in to (seq, batch_size, vocab_size) dim vector
-        decoded = decoded.view(output.size(0), output.size(1), decoded.size(1))
-        return decoded, hidden
+        output = output.view(output.size(0), output.size(1), output.size(1))
+        return output, hidden
 
     def init_hidden(self, bsz):
         weight = next(self.parameters())  # Calling super class method
