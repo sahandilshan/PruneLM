@@ -15,7 +15,7 @@ corpus = Corpus(model_data_filepath)
 
 print(f'Number of words: {len(corpus.dictionary)}')
 BATCH_SIZE = 256
-SEQUENCE_LENGTH = 6
+SEQUENCE_LENGTH = 10
 TRAIN_DATA = batchify(corpus.train, BATCH_SIZE, device)
 VAL_DATA = batchify(corpus.valid, BATCH_SIZE, device)
 TEST_DATA = batchify(corpus.test, BATCH_SIZE, device)
