@@ -1,7 +1,7 @@
 import torch
 
 
-def batchify(data, batch_size, device):
+def batchify(data, batch_size, device='cpu'):
     # Get number of batches
     num_batch = data.size(0) // batch_size
     # Trim off any extra elements that wouldn't cleanly fit (remainders).
