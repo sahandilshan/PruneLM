@@ -1,16 +1,7 @@
-import torch
 import torch.nn as nn
 
-EMBEDDING_DIMS = 512
-HIDDEN_DIMS = 256
-NUM_LAYERS = 2
-DROPOUT = 0.5
 
-# Set gpu if available, otherwise use CPU
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-
-class Bi_LSTM_Model:
+class Bi_LSTM_Model(nn.Module):
     def __init__(self, vocab_size, embedding_dims, hidden_dims, num_layers, dropout=0.5):
         super(Bi_LSTM_Model, self).__init__()
         self.drop = nn.Dropout(dropout)
@@ -34,16 +25,16 @@ class Bi_LSTM_Model:
         self.bi_lstm.flatten_parameters()
         output, hidden = self.bi_lstm(emb, hidden)
         output = self.drop(output)
-        output_size_0 = output.shape(0)     # sequence size
-        output_size_1 = output.shape(1)     # batch size
-        output_size_2 = output.shape(2)     # hidden_size
+        output_size_0 = output.size(0)     # sequence size
+        output_size_1 = output.size(1)     # batch size
+        output_size_2 = output.size(2)     # hidden_size
 
         # shape: {(seq * batch_size), hidden_dims} - hidden state contains
         # num_directions * hidden_size
         output = output.view(output_size_0 * output_size_1, output_size_2)
         output = self.output_layer(output)
         # Converting in to (seq, batch_size, vocab_size) dim vector
-        output = output.view(output.size(0), output.size(1), output.size(1))
+        output = output.view(output_size_0, output_size_1, output.size(1))
         return output, hidden
 
     def init_hidden(self, bsz):
