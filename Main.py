@@ -25,6 +25,7 @@ HIDDEN_DIMS = 256
 NUM_LAYERS = 2
 DROPOUT = 0.5
 EPOCHS = 10
+MODEL_SAVED_PATH = 'model.ckpt'
 
 model = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                       hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
@@ -45,7 +46,7 @@ for epoch in range(1, EPOCHS + 1):
     # Save the model if the validation loss is the best we've seen so far.
     if not best_val_loss or val_loss < best_val_loss:
         print('model saving....')
-        torch.save(model.state_dict(), 'train/saved_models/model.ckpt')
+        torch.save(model.state_dict(), MODEL_SAVED_PATH)
         best_val_loss = val_loss
     else:
         print('Model not saving....')
