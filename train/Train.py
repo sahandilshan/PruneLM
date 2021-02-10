@@ -16,9 +16,6 @@ from train.Utils import get_batch, repackage_hidden
 #     globals = corpus
 
 
-best_val_loss = None
-
-
 def train(model, criterion, optimizer, corpus, train_data, epoch_no, epochs,
           batch_size=256, sequence_length=6):
     # Turn on training mode which enables dropout.

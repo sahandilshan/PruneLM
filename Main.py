@@ -31,12 +31,12 @@ model = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
 model.to(device)
 optimizer = optim.Adam(model.parameters())
 criterion = nn.CrossEntropyLoss()
-
+best_val_loss = None
 for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
     train(model, criterion, optimizer, corpus, TRAIN_DATA, epoch, EPOCHS,
           batch_size=BATCH_SIZE, sequence_length=SEQUENCE_LENGTH)
-    val_loss = evaluate(VAL_DATA)
+    val_loss = evaluate(VAL_DATA, model, criterion, corpus, BATCH_SIZE, SEQUENCE_LENGTH)
     print('-' * 89)
     print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
           'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
