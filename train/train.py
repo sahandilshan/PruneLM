@@ -2,7 +2,7 @@ from torch import nn
 from tqdm import tqdm
 import math
 # import time
-from train.Utils import get_batch, repackage_hidden
+from train.utils import get_batch, repackage_hidden
 
 # corpus = None
 # num_tokens = None

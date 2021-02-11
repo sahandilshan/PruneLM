@@ -2,10 +2,10 @@ import torch
 from torch import optim, nn
 import time
 import math
-from train.Corpus import Corpus
-from train.Utils import batchify, evaluate
-from model.Bi_LSTM_LM import Bi_LSTM_Model
-from train.Train import train
+from train.corpus import Corpus
+from train.utils import batchify, evaluate
+from model.bi_lstm_lm import Bi_LSTM_Model
+from train.train import train
 
 # Set gpu if available, otherwise use CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
