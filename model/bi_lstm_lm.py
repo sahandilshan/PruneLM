@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 
@@ -41,3 +42,8 @@ class Bi_LSTM_Model(nn.Module):
         weight = next(self.parameters())  # Calling super class method
         return (weight.new_zeros(self.num_layers * 2, bsz, self.hidden_dims),
                 weight.new_zeros(self.num_layers * 2, bsz, self.hidden_dims))
+
+    def load_model(self, path_to_state_dict):
+        self.load_state_dict(torch.load(path_to_state_dict))
+        print('Model load successfully')
+
