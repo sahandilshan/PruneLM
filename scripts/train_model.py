@@ -10,7 +10,7 @@ from train.train import train
 # Set gpu if available, otherwise use CPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # device = 'cpu'
-model_data_filepath = 'data/wikitext-2'
+model_data_filepath = '../data/wikitext-2'
 corpus = Corpus(model_data_filepath)
 
 print(f'Number of words: {len(corpus.dictionary)}')
