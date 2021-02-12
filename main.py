@@ -1,10 +1,12 @@
 import configparser
-import os
 import math
+import os
+import time
+from data.dataset import get_dataset
 from model.bi_lstm_lm import Bi_LSTM_Model, get_criterion, get_optimizer
 from prune.prune import Prune
 from prune.utils import *
-from data.dataset import get_dataset
+from train.train import train
 from train.utils import evaluate
 
 config = configparser.RawConfigParser()
@@ -27,7 +29,7 @@ except FileExistsError:
     pass
 EPOCHS = None
 if PRUNING_TYPE == 'iterative':
-    EPOCHS = prune_configs['epochs']
+    EPOCHS = int(prune_configs.get('epochs', 10))
     print(f'Epochs: {EPOCHS}')
 print(f'Prune Type: {PRUNING_TYPE}, Percentage: {PERCENTAGES}')
 
@@ -41,6 +43,7 @@ HIDDEN_DIMS = int(model_load_configs['hidden_dims'])
 NUM_LAYERS = int(model_load_configs['num_stacked_rnn'])
 DROPOUT = float(model_load_configs['dropout'])
 PATH_TO_STATE_DIC = model_load_configs['model_path']
+MODEL_SAVING_TYPE = model_load_configs.get('model_saving_type', 'best')
 model = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                       hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
 model.load_model(PATH_TO_STATE_DIC)
@@ -63,9 +66,9 @@ print('| test loss {:5.2f} | '
       'test ppl {:8.2f}'.format(test_loss, math.exp(test_loss)))
 print('-' * 89)
 
+total_params = get_total_parameters_count(model)
 # Basic Pruning
 if PRUNING_TYPE == 'basic':
-    total_params = get_total_parameters_count(model)
     for percentage in PERCENTAGES:
         prunedModel = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                                     hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
@@ -88,5 +91,44 @@ if PRUNING_TYPE == 'basic':
         print('| valid loss {:5.2f} | '
               'valid ppl {:8.2f}'.format(val_loss, math.exp(val_loss)))
         print('-' * 89)
+
+# Iterative Pruning
+elif PRUNING_TYPE == 'iterative':
+    EPOCHS = EPOCHS if EPOCHS is not None else 10
+    MODEL_SAVING_TYPE = MODEL_SAVING_TYPE if MODEL_SAVING_TYPE is not None else 'best'
+    for percentage in PERCENTAGES:
+        best_val_loss = None
+        prunedModel = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
+                                    hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
+        prunedModel.to(DEVICE)
+        # Pruning for the first time before begins training
+        prune = Prune(model, percentage)
+        pruned_state_dic = prune.modelPruning()
+        prunedModel.load_state_dict(pruned_state_dic)
+        path = MODEL_SAVING_PATH + '/pruned_model_' + str(percentage) + '.ckpt'
+        for epoch in range(1, EPOCHS + 1):
+            epoch_start_time = time.time()
+            train(prunedModel, criterion, optimizer, NUM_TOKENS, TRAIN_SET, epoch, EPOCHS,
+                  batch_size=BATCH_SIZE, sequence_length=SEQUENCE_LENGTH)
+            prune = Prune(prunedModel, percentage)
+            pruned_state_dic = prune.modelPruning()
+            prunedModel.load_state_dict(pruned_state_dic)
+            val_loss = evaluate(VALID_SET, prunedModel, criterion, NUM_TOKENS,
+                                BATCH_SIZE, SEQUENCE_LENGTH)
+            print('-' * 89)
+            print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
+                  'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
+                                             val_loss, math.exp(val_loss)))
+            print('-' * 89)
+            if MODEL_SAVING_TYPE == 'best':
+                if not best_val_loss or val_loss < best_val_loss:
+                    print('model saving....')
+                    torch.save(prunedModel.state_dict(), path)
+                    best_val_loss = val_loss
+                else:
+                    print('Model not saving....')
+
+        if MODEL_SAVING_TYPE == 'last':
+            torch.save(prunedModel.state_dict(), path)
 
 print('done')
