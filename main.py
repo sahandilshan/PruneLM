@@ -69,6 +69,7 @@ if PRUNING_TYPE == 'basic':
     for percentage in PERCENTAGES:
         prunedModel = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                                     hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
+        prunedModel.to(DEVICE)
         prune = Prune(model, percentage)
         pruned_state_dic = prune.modelPruning()
         prunedModel.load_state_dict(pruned_state_dic)
