@@ -102,7 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-data
 *.pt
 *.pth
 *.hdf5
@@ -113,7 +112,6 @@ debug
 pretrained
 __old
 slurmlog
-scripts/imagenet_profiling_results.csv
 results*
 scripts/*.sh
 
