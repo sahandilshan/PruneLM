@@ -59,7 +59,7 @@ val_loss = evaluate(VALID_SET, model, criterion, NUM_TOKENS,
                     BATCH_SIZE, SEQUENCE_LENGTH)
 test_loss = evaluate(TEST_SET, model, criterion, NUM_TOKENS,
                      BATCH_SIZE, SEQUENCE_LENGTH)
-print('-' * 89)
+print('-' * 35, 'original model performance', '35' * 35)
 print('| valid loss {:5.2f} | '
       'valid ppl {:8.2f}'.format(val_loss, math.exp(val_loss)))
 print('| test loss {:5.2f} | '
@@ -94,13 +94,14 @@ if PRUNING_TYPE == 'basic':
 
 # Iterative Pruning
 elif PRUNING_TYPE == 'iterative':
-    EPOCHS = EPOCHS if EPOCHS is not None else 10
-    MODEL_SAVING_TYPE = MODEL_SAVING_TYPE if MODEL_SAVING_TYPE is not None else 'best'
     for percentage in PERCENTAGES:
+        print('-' * 35, 'Pruning model from ' + str(percentage) + '%', '-' * 35)
         best_val_loss = None
         prunedModel = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                                     hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
         prunedModel.to(DEVICE)
+        prune_optimizer = get_optimizer(prunedModel.parameters())
+        prune_criterion = get_criterion()
         # Pruning for the first time before begins training
         prune = Prune(model, percentage)
         pruned_state_dic = prune.modelPruning()
@@ -108,18 +109,18 @@ elif PRUNING_TYPE == 'iterative':
         path = MODEL_SAVING_PATH + '/pruned_model_' + str(percentage) + '.ckpt'
         for epoch in range(1, EPOCHS + 1):
             epoch_start_time = time.time()
-            train(prunedModel, criterion, optimizer, NUM_TOKENS, TRAIN_SET, epoch, EPOCHS,
+            train(prunedModel, prune_criterion, prune_optimizer, NUM_TOKENS, TRAIN_SET, epoch, EPOCHS,
                   batch_size=BATCH_SIZE, sequence_length=SEQUENCE_LENGTH)
             prune = Prune(prunedModel, percentage)
             pruned_state_dic = prune.modelPruning()
             prunedModel.load_state_dict(pruned_state_dic)
-            val_loss = evaluate(VALID_SET, prunedModel, criterion, NUM_TOKENS,
+            val_loss = evaluate(VALID_SET, prunedModel, prune_criterion, NUM_TOKENS,
                                 BATCH_SIZE, SEQUENCE_LENGTH)
-            print('-' * 89)
+            print('-' * 70)
             print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
                   'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
                                              val_loss, math.exp(val_loss)))
-            print('-' * 89)
+            print('-' * 70)
             if MODEL_SAVING_TYPE == 'best':
                 if not best_val_loss or val_loss < best_val_loss:
                     print('model saving....')
@@ -130,5 +131,10 @@ elif PRUNING_TYPE == 'iterative':
 
         if MODEL_SAVING_TYPE == 'last':
             torch.save(prunedModel.state_dict(), path)
-
+        dropped_params_count = get_dropped_parameters_count(prunedModel)
+        print('Total Number of Parameters before Pruning:', total_params)
+        print('Dropped Parameters:', dropped_params_count)
+        print('After Pruning: ', (total_params - dropped_params_count))
+        print(f'Percentage: {(dropped_params_count / total_params) * 100}%')
+        print('-' * 90 + '\n')
 print('done')

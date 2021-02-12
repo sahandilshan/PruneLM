@@ -31,6 +31,6 @@ class Prune:
             if 'weight' in k:  # skip bias
                 w = state_dictionary[k]
                 state_dictionary[k] = w * (w.abs() > self.threshold)
-        print(f'Threshold: {self.threshold}')
+        # print(f'Threshold: {self.threshold}')
         # print(f'Model pruned from {self.threshold * 100}%')
         return state_dictionary
