@@ -7,7 +7,7 @@ class Prune:
         self.model = model
         self.percentage = percentage * 0.01
         self.threshold = self.__calculateThreshold()
-        print(self.percentage)
+        # print(self.percentage)
 
     def __flattenParams(self):
         state_dictionary = self.model.state_dict()
