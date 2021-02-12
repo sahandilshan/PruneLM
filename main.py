@@ -59,7 +59,7 @@ val_loss = evaluate(VALID_SET, model, criterion, NUM_TOKENS,
                     BATCH_SIZE, SEQUENCE_LENGTH)
 test_loss = evaluate(TEST_SET, model, criterion, NUM_TOKENS,
                      BATCH_SIZE, SEQUENCE_LENGTH)
-print('-' * 35, 'original model performance', '35' * 35)
+print('-' * 35, 'original model performance', '-' * 35)
 print('| valid loss {:5.2f} | '
       'valid ppl {:8.2f}'.format(val_loss, math.exp(val_loss)))
 print('| test loss {:5.2f} | '
@@ -100,7 +100,7 @@ elif PRUNING_TYPE == 'iterative':
         prunedModel = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                                     hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
         prunedModel.to(DEVICE)
-        prune_optimizer = get_optimizer(prunedModel.parameters())
+        prune_optimizer = get_optimizer(prunedModel)
         prune_criterion = get_criterion()
         # Pruning for the first time before begins training
         prune = Prune(model, percentage)
