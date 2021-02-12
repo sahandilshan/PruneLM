@@ -1,5 +1,5 @@
 import torch
-import torch.nn as nn
+from torch import nn, optim
 
 
 class Bi_LSTM_Model(nn.Module):
@@ -26,9 +26,9 @@ class Bi_LSTM_Model(nn.Module):
         self.bi_lstm.flatten_parameters()
         output, hidden = self.bi_lstm(emb, hidden)
         output = self.drop(output)
-        output_size_0 = output.size(0)     # sequence size
-        output_size_1 = output.size(1)     # batch size
-        output_size_2 = output.size(2)     # hidden_size
+        output_size_0 = output.size(0)  # sequence size
+        output_size_1 = output.size(1)  # batch size
+        output_size_2 = output.size(2)  # hidden_size
 
         # shape: {(seq * batch_size), hidden_dims} - hidden state contains
         # num_directions * hidden_size
@@ -47,3 +47,10 @@ class Bi_LSTM_Model(nn.Module):
         self.load_state_dict(torch.load(path_to_state_dict))
         print('Model load successfully')
 
+
+def get_optimizer(model):
+    return optim.Adam(model.parameters())
+
+
+def get_criterion():
+    return nn.CrossEntropyLoss()
