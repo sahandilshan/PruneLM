@@ -16,13 +16,12 @@ from train.utils import get_batch, repackage_hidden
 #     globals = corpus
 
 
-def train(model, criterion, optimizer, corpus, train_data, epoch_no, epochs,
+def train(model, criterion, optimizer, num_tokens, train_data, epoch_no, epochs,
           batch_size=256, sequence_length=6):
     # Turn on training mode which enables dropout.
-    assert corpus is not None
+    assert num_tokens is not None
     model.train()
     total_loss = 0.
-    num_tokens = len(corpus.dictionary)
     loop = tqdm(enumerate(range(0, train_data.size(0) - 1, sequence_length)), total=len(train_data) // sequence_length,
                 position=0, leave=True)
     counter = 0

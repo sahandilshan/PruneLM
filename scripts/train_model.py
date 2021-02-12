@@ -35,7 +35,7 @@ criterion = nn.CrossEntropyLoss()
 best_val_loss = None
 for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
-    train(model, criterion, optimizer, corpus, TRAIN_DATA, epoch, EPOCHS,
+    train(model, criterion, optimizer, NUM_TOKENS, TRAIN_DATA, epoch, EPOCHS,
           batch_size=BATCH_SIZE, sequence_length=SEQUENCE_LENGTH)
     val_loss = evaluate(VAL_DATA, model, criterion, NUM_TOKENS, BATCH_SIZE, SEQUENCE_LENGTH)
     print('-' * 89)
