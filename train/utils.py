@@ -33,7 +33,7 @@ def evaluate(data_source, model, criterion, num_tokens, batch_size, sequence_len
     hidden = model.init_hidden(batch_size)
     with torch.no_grad():
         for i in range(0, data_source.size(0) - 1, sequence_length):
-            data, targets = get_batch(data_source, i)
+            data, targets = get_batch(data_source, i, sequence_length)
             output, hidden = model(data, hidden)
             output_flat = output.view(-1, num_tokens)
             total_loss += len(data) * criterion(output_flat, targets).item()
