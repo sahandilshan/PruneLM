@@ -14,7 +14,7 @@ from utils.show_stat import show_parameters_stats, show_model_size_stats
 from utils.size import get_original_model_size, get_pruned_model_size
 
 config = configparser.RawConfigParser()
-config.read('configs/pruningConfigs.cfg')
+config.read('./configs/pruningConfigs.cfg')
 prune_configs = dict(config.items('Prune Configs'))
 model_load_configs = dict(config.items('Model Loading Configs'))
 print(prune_configs)
