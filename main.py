@@ -10,6 +10,7 @@ from prune.prune import Prune
 from train.train import train
 from train.utils import evaluate
 from utils.parameters import get_total_parameters_count, get_pruned_parameters_count
+from utils.show_stat import show_parameters_stats
 from utils.size import get_original_model_size, get_pruned_model_size
 
 config = configparser.RawConfigParser()
@@ -51,6 +52,8 @@ MODEL_SAVING_TYPE = model_load_configs.get('model_saving_type', 'best')
 model = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                       hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
 model.load_model(PATH_TO_STATE_DIC)
+if PRUNING_ENABLED == 'true':
+    print('skipping pruning and showing status of existing pruned models')
 model.to(DEVICE)
 optimizer = get_optimizer(model)
 criterion = get_criterion()
@@ -81,10 +84,7 @@ if PRUNING_TYPE == 'basic' and PRUNING_ENABLED == 'true':
         pruned_state_dic = prune.modelPruning()
         prunedModel.load_state_dict(pruned_state_dic)
         pruned_model_params = get_pruned_parameters_count(prunedModel)
-        print('Total Number of Parameters before Pruning:', total_params)
-        print('Dropped Parameters:', (total_params - pruned_model_params))
-        print('After Pruning: ', pruned_model_params)
-        print(f'Percentage: {str(round(pruned_model_params / total_params * 100, 2))}%')
+        show_parameters_stats(total_params, pruned_model_params)
         path = MODEL_SAVING_PATH + '/pruned_model_' + str(percentage) + '.ckpt'
         torch.save(prunedModel.state_dict(), path)
         print('model saved.')
@@ -137,12 +137,7 @@ elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
             torch.save(prunedModel.state_dict(), path)
 
         pruned_model_params = get_pruned_parameters_count(prunedModel)
-        print('Total Number of Parameters before Pruning:', total_params)
-        print('After Pruning: ', pruned_model_params)
-        dropped_params_count = total_params - pruned_model_params
-        print('Dropped Parameters:', dropped_params_count)
-        print(f'Pruned percentage'
-              f': {str(round(dropped_params_count / total_params * 100, 2))}%')
+        show_parameters_stats(total_params, pruned_model_params)
         print('-' * 100 + '\n')
 
 # Compression stat
@@ -155,6 +150,9 @@ for file in os.listdir(MODEL_SAVING_PATH):
         pruned_model.load_model(path)
         pruned_model_size = get_pruned_model_size(pruned_model)
         print('-' * 37, file + '%', '-' * 38)
+        pruned_model_params = get_pruned_parameters_count(pruned_model)
+        show_parameters_stats(total_params, pruned_model_params)
+        print()
         print(f'Original Model size: {original_model_size}, '
               f'Pruned Model size: {pruned_model_size}')
         compressed_size = round(original_model_size - pruned_model_size, 2)
