@@ -20,6 +20,7 @@ print(prune_configs)
 print(model_load_configs)
 
 # Save Pruning Configs
+PRUNING_ENABLED = prune_configs['enable']
 PRUNING_TYPE = prune_configs['prune_type']
 PERCENTAGES = prune_configs['percentage']
 PERCENTAGES = PERCENTAGES.split()
@@ -71,7 +72,7 @@ print('-' * 100)
 
 total_params = get_total_parameters_count(model)
 # Basic Pruning
-if PRUNING_TYPE == 'basic':
+if PRUNING_TYPE == 'basic' and PRUNING_ENABLED == 'true':
     for percentage in PERCENTAGES:
         prunedModel = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                                     hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
@@ -96,7 +97,7 @@ if PRUNING_TYPE == 'basic':
         print('-' * 89)
 
 # Iterative Pruning
-elif PRUNING_TYPE == 'iterative':
+elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
     for percentage in PERCENTAGES:
         print('-' * 37, 'Pruning model from' + str(percentage) + '%', '-' * 38)
         best_val_loss = None
