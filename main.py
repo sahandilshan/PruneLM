@@ -10,7 +10,7 @@ from prune.prune import Prune
 from train.train import train
 from train.utils import evaluate
 from utils.parameters import get_total_parameters_count, get_pruned_parameters_count
-from utils.show_stat import show_parameters_stats
+from utils.show_stat import show_parameters_stats, show_model_size_stats
 from utils.size import get_original_model_size, get_pruned_model_size
 
 config = configparser.RawConfigParser()
@@ -52,7 +52,7 @@ MODEL_SAVING_TYPE = model_load_configs.get('model_saving_type', 'best')
 model = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                       hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
 model.load_model(PATH_TO_STATE_DIC)
-if PRUNING_ENABLED == 'true':
+if PRUNING_ENABLED != 'true':
     print('skipping pruning and showing status of existing pruned models')
 model.to(DEVICE)
 optimizer = get_optimizer(model)
@@ -149,16 +149,11 @@ for file in os.listdir(MODEL_SAVING_PATH):
                                      hidden_dims=HIDDEN_DIMS, num_layers=2, dropout=DROPOUT)
         pruned_model.load_model(path)
         pruned_model_size = get_pruned_model_size(pruned_model)
-        print('-' * 37, file + '%', '-' * 38)
+        print('-' * 37, file, '-' * 38)
         pruned_model_params = get_pruned_parameters_count(pruned_model)
         show_parameters_stats(total_params, pruned_model_params)
         print()
-        print(f'Original Model size: {original_model_size}, '
-              f'Pruned Model size: {pruned_model_size}')
-        compressed_size = round(original_model_size - pruned_model_size, 2)
-        print(f'Reduced size:{compressed_size}')
-        print(f'Compressed Percentage'
-              f': {round(compressed_size / original_model_size * 100, 2)}')
+        show_model_size_stats(original_model_size, pruned_model_size)
         print('-' * 100 + '\n')
 
 print('done')
