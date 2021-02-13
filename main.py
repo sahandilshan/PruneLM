@@ -2,12 +2,15 @@ import configparser
 import math
 import os
 import time
+import torch
+
 from data.dataset import get_dataset
 from model.bi_lstm_lm import Bi_LSTM_Model, get_criterion, get_optimizer
 from prune.prune import Prune
-from prune.utils import *
 from train.train import train
 from train.utils import evaluate
+from utils.parameters import get_total_parameters_count, get_pruned_parameters_count
+from utils.size import get_original_model_size, get_pruned_model_size
 
 config = configparser.RawConfigParser()
 config.read('configs/pruningConfigs.cfg')
@@ -31,7 +34,7 @@ EPOCHS = None
 if PRUNING_TYPE == 'iterative':
     EPOCHS = int(prune_configs.get('epochs', 10))
     print(f'Epochs: {EPOCHS}')
-print(f'Prune Type: {PRUNING_TYPE}, Percentage: {PERCENTAGES}')
+print(f'Prune Type: {PRUNING_TYPE}, Percentage(s): {PERCENTAGES}')
 
 # Loading the model
 DEVICE = model_load_configs['device']
@@ -59,12 +62,12 @@ val_loss = evaluate(VALID_SET, model, criterion, NUM_TOKENS,
                     BATCH_SIZE, SEQUENCE_LENGTH)
 test_loss = evaluate(TEST_SET, model, criterion, NUM_TOKENS,
                      BATCH_SIZE, SEQUENCE_LENGTH)
-print('-' * 35, 'original model performance', '-' * 35)
+print('-' * 36, 'original model performance', '-' * 36)
 print('| valid loss {:5.2f} | '
       'valid ppl {:8.2f}'.format(val_loss, math.exp(val_loss)))
 print('| test loss {:5.2f} | '
       'test ppl {:8.2f}'.format(test_loss, math.exp(test_loss)))
-print('-' * 89)
+print('-' * 100)
 
 total_params = get_total_parameters_count(model)
 # Basic Pruning
@@ -76,11 +79,11 @@ if PRUNING_TYPE == 'basic':
         prune = Prune(model, percentage)
         pruned_state_dic = prune.modelPruning()
         prunedModel.load_state_dict(pruned_state_dic)
-        dropped_params_count = get_dropped_parameters_count(prunedModel)
+        pruned_model_params = get_pruned_parameters_count(prunedModel)
         print('Total Number of Parameters before Pruning:', total_params)
-        print('Dropped Parameters:', dropped_params_count)
-        print('After Pruning: ', (total_params - dropped_params_count))
-        print(f'Percentage: {(dropped_params_count / total_params) * 100}%')
+        print('Dropped Parameters:', (total_params - pruned_model_params))
+        print('After Pruning: ', pruned_model_params)
+        print(f'Percentage: {str(round(pruned_model_params / total_params * 100, 2))}%')
         path = MODEL_SAVING_PATH + '/pruned_model_' + str(percentage) + '.ckpt'
         torch.save(prunedModel.state_dict(), path)
         print('model saved.')
@@ -95,7 +98,7 @@ if PRUNING_TYPE == 'basic':
 # Iterative Pruning
 elif PRUNING_TYPE == 'iterative':
     for percentage in PERCENTAGES:
-        print('-' * 35, 'Pruning model from ' + str(percentage) + '%', '-' * 35)
+        print('-' * 37, 'Pruning model from' + str(percentage) + '%', '-' * 38)
         best_val_loss = None
         prunedModel = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                                     hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
@@ -131,10 +134,32 @@ elif PRUNING_TYPE == 'iterative':
 
         if MODEL_SAVING_TYPE == 'last':
             torch.save(prunedModel.state_dict(), path)
-        dropped_params_count = get_dropped_parameters_count(prunedModel)
+
+        pruned_model_params = get_pruned_parameters_count(prunedModel)
         print('Total Number of Parameters before Pruning:', total_params)
+        print('After Pruning: ', pruned_model_params)
+        dropped_params_count = total_params - pruned_model_params
         print('Dropped Parameters:', dropped_params_count)
-        print('After Pruning: ', (total_params - dropped_params_count))
-        print(f'Percentage: {(dropped_params_count / total_params) * 100}%')
-        print('-' * 90 + '\n')
+        print(f'Pruned percentage'
+              f': {str(round(dropped_params_count / total_params * 100, 2))}%')
+        print('-' * 100 + '\n')
+
+# Compression stat
+for file in os.listdir(MODEL_SAVING_PATH):
+    original_model_size = get_original_model_size(model)
+    if file.endswith(".ckpt"):
+        path = os.path.join(MODEL_SAVING_PATH, file)
+        pruned_model = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
+                                     hidden_dims=HIDDEN_DIMS, num_layers=2, dropout=DROPOUT)
+        pruned_model.load_model(path)
+        pruned_model_size = get_pruned_model_size(pruned_model)
+        print('-' * 37, file + '%', '-' * 38)
+        print(f'Original Model size: {original_model_size}, '
+              f'Pruned Model size: {pruned_model_size}')
+        compressed_size = round(original_model_size - pruned_model_size, 2)
+        print(f'Reduced size:{compressed_size}')
+        print(f'Compressed Percentage'
+              f': {round(compressed_size / original_model_size * 100, 2)}')
+        print('-' * 100 + '\n')
+
 print('done')
