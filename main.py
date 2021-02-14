@@ -99,7 +99,7 @@ if PRUNING_TYPE == 'basic' and PRUNING_ENABLED == 'true':
 # Iterative Pruning
 elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
     for percentage in PERCENTAGES:
-        print('-' * 37, 'Pruning model from' + str(percentage) + '%', '-' * 38)
+        print('-' * 37, 'Pruning model from ' + str(percentage) + '%', '-' * 38)
         best_val_loss = None
         prunedModel = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                                     hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
