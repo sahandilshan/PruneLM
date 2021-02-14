@@ -12,11 +12,13 @@ from train.utils import evaluate
 from utils.parameters import get_total_parameters_count, get_pruned_parameters_count
 from utils.show_stat import show_parameters_stats, show_model_size_stats
 from utils.size import get_original_model_size, get_pruned_model_size
+from statistics.client import MyHttpClient
 
 config = configparser.RawConfigParser()
 config.read('./configs/pruningConfigs.cfg')
 prune_configs = dict(config.items('Prune Configs'))
 model_load_configs = dict(config.items('Model Loading Configs'))
+stat_configs = dict(config.items('Statistics Configs'))
 print(prune_configs)
 print(model_load_configs)
 
@@ -37,6 +39,12 @@ if PRUNING_TYPE == 'iterative':
     EPOCHS = int(prune_configs.get('epochs', 10))
     print(f'Epochs: {EPOCHS}')
 print(f'Prune Type: {PRUNING_TYPE}, Percentage(s): {PERCENTAGES}')
+
+# getting Statistics Configs
+STAT_ENABLED = stat_configs['enable']
+STAT_ENABLED = True if STAT_ENABLED == 'true' else False
+SERVER_URL = stat_configs['server_url']
+client = MyHttpClient(SERVER_URL)
 
 # Loading the model
 DEVICE = model_load_configs['device']
@@ -74,6 +82,14 @@ print('| test loss {:5.2f} | '
 print('-' * 100)
 
 total_params = get_total_parameters_count(model)
+original_model_size = get_original_model_size(model)
+
+if STAT_ENABLED:
+    client.send_test_result('original', math.exp(test_loss))
+    client.send_valid_result('original', math.exp(val_loss))
+    client.send_model_size('original', original_model_size)
+    client.send_model_params('original', total_params)
+
 # Basic Pruning
 if PRUNING_TYPE == 'basic' and PRUNING_ENABLED == 'true':
     for percentage in PERCENTAGES:
@@ -85,15 +101,21 @@ if PRUNING_TYPE == 'basic' and PRUNING_ENABLED == 'true':
         prunedModel.load_state_dict(pruned_state_dic)
         pruned_model_params = get_pruned_parameters_count(prunedModel)
         show_parameters_stats(total_params, pruned_model_params)
+        model_name = 'pruned_model_' + str(percentage)
         path = MODEL_SAVING_PATH + '/pruned_model_' + str(percentage) + '.ckpt'
         torch.save(prunedModel.state_dict(), path)
         print('model saved.')
         print(f'Model saved path: {path}')
+        pruned_model_size = get_pruned_model_size(prunedModel)
         val_loss = evaluate(VALID_SET, prunedModel, criterion, NUM_TOKENS,
                             BATCH_SIZE, SEQUENCE_LENGTH)
-        print('-' * 89)
+        test_loss = evaluate(TEST_SET, prunedModel, criterion, NUM_TOKENS,
+                             BATCH_SIZE, SEQUENCE_LENGTH)
+        # print('-' * 89)
         print('| valid loss {:5.2f} | '
-              'valid ppl {:8.2f}'.format(val_loss, math.exp(val_loss)))
+              'valid ppl {:8.2f}'.format(test_loss, math.exp(test_loss)))
+        print('| test loss {:5.2f} | '
+              'test ppl {:8.2f}'.format(test_loss, math.exp(test_loss)))
         print('-' * 89)
 
 # Iterative Pruning
@@ -142,7 +164,6 @@ elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
 
 # Compression stat
 for file in os.listdir(MODEL_SAVING_PATH):
-    original_model_size = get_original_model_size(model)
     if file.endswith(".ckpt"):
         path = os.path.join(MODEL_SAVING_PATH, file)
         pruned_model = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
@@ -155,5 +176,12 @@ for file in os.listdir(MODEL_SAVING_PATH):
         print()
         show_model_size_stats(original_model_size, pruned_model_size)
         print('-' * 100 + '\n')
+        if STAT_ENABLED:
+            client.send_test_result(file, math.exp(test_loss))
+            client.send_valid_result(file, math.exp(val_loss))
+            client.send_model_size(file, pruned_model_size)
+            client.send_model_params(file, pruned_model_params)
 
 print('done')
+
+# TODO get prometheus server url from the configs and init prometheus client
