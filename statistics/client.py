@@ -96,23 +96,23 @@ class MyHttpClient:
         data = json.dumps(data)
         requests.post(url=self.url + '/last_epoch_elapsed_time', json=data)
 
-    def send_total_batch_size(self, model_name, pruning_type, batch_size):
-        data = {
-            "model_name": f"{model_name}",
-            "pruning_type": f"{pruning_type}",
-            "batch_size": batch_size
-        }
-        data = json.dumps(data)
-        requests.post(url=self.url + '/total_batch_size', json=data)
-
-    def send_current_batch_number(self, model_name, pruning_type, batch_size):
-        data = {
-            "model_name": f"{model_name}",
-            "pruning_type": f"{pruning_type}",
-            "batch_size": batch_size
-        }
-        data = json.dumps(data)
-        requests.post(url=self.url + '/current_batch', json=data)
+    # def send_total_batch_size(self, model_name, pruning_type, batch_size):
+    #     data = {
+    #         "model_name": f"{model_name}",
+    #         "pruning_type": f"{pruning_type}",
+    #         "batch_size": batch_size
+    #     }
+    #     data = json.dumps(data)
+    #     requests.post(url=self.url + '/total_batch_size', json=data)
+    #
+    # def send_current_batch_number(self, model_name, pruning_type, batch_size):
+    #     data = {
+    #         "model_name": f"{model_name}",
+    #         "pruning_type": f"{pruning_type}",
+    #         "batch_size": batch_size
+    #     }
+    #     data = json.dumps(data)
+    #     requests.post(url=self.url + '/current_batch', json=data)
 
     def send_model_size(self,  model_name, pruning_type, model_size):
         data = {
