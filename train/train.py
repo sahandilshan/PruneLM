@@ -1,12 +1,11 @@
 from torch import nn
 from tqdm import tqdm
 import math
-# import time
 from train.utils import get_batch, repackage_hidden
 
 
 def train(model, criterion, optimizer, num_tokens, train_data, epoch_no, epochs,
-          batch_size=256, sequence_length=6, client=None, model_name=None):
+          batch_size=256, sequence_length=6):
     # Turn on training mode which enables dropout.
     assert num_tokens is not None
     model.train()
@@ -36,10 +35,4 @@ def train(model, criterion, optimizer, num_tokens, train_data, epoch_no, epochs,
         loop.set_description(f"Epoch: [{epoch_no}/{epochs}]")
         loop.set_postfix(loss=loss.item(), ppl=math.exp(loss.item()))
 
-        if client is not None:
-            client.send_current_batch_number(model_name, data)
-            client.send_total_batch_size(model_name, len(train_data) // sequence_length)
-            # avg_train_loss = total_loss / len(train_data)
-            client.send_train_loss(model_name, loss.item())
-            client.send_train_ppl(model_name, math.exp(math.exp(loss.item())))
-
+    return total_loss / len(train_data)
