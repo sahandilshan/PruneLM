@@ -1,13 +1,24 @@
-# import main Flask class and request object
+import configparser
+import json
 from flask import Flask, request
-from prometheus_client import start_http_server, Gauge, Counter
+from prometheus_client import Gauge, Counter, start_http_server
 
 # create the Flask app
 app = Flask('Pruning Statistics')
 
+config = configparser.RawConfigParser()
+config.read('../configs/pruningConfigs.cfg')
+stat_configs = dict(config.items('Prometheus Configs'))
+
+
+def create_prometheus_client(port):
+    start_http_server(int(port))
+
 
 class Metrics(object):
     def __init__(self):
+        port = stat_configs['prometheus_port']
+        start_http_server(int(port))
         self.init_pruned_metric = Counter('prune_lm_pruned_model',
                                           'to get the names of pruned models', ['model_name'])
         self.test_ppl_gauge = Gauge('prune_lm_test_ppl',
@@ -34,10 +45,6 @@ class Metrics(object):
 metrics = Metrics()
 
 
-def start_prometheus_client(port):
-    start_http_server(port)
-
-
 @app.route('/', methods=['POST', 'GET'])
 def init():
     # start_http_server(8000)
@@ -47,6 +54,7 @@ def init():
 @app.route('/init', methods=['POST'])
 def published_init_metrics():  # this metric is only used to get the pruned_model name as variable
     msg_body = request.get_json()
+    msg_body = json.loads(msg_body)
     if msg_body is not None:
         model_name = msg_body['model_name']
         metrics.init_pruned_metric.labels(model_name).inc()
@@ -56,6 +64,7 @@ def published_init_metrics():  # this metric is only used to get the pruned_mode
 @app.route('/test_ppl', methods=['POST'])
 def published_test_ppl_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         ppl = request_data['ppl']
@@ -66,6 +75,7 @@ def published_test_ppl_metric():
 @app.route('/valid_ppl', methods=['POST'])
 def published_valid_ppl_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         ppl = request_data['ppl']
@@ -76,6 +86,7 @@ def published_valid_ppl_metric():
 @app.route('/valid_loss', methods=['POST'])
 def published_valid_loss_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         loss = request_data['loss']
@@ -86,6 +97,7 @@ def published_valid_loss_metric():
 @app.route('/train_ppl', methods=['POST'])
 def published_train_ppl_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         ppl = request_data['ppl']
@@ -96,6 +108,7 @@ def published_train_ppl_metric():
 @app.route('/train_loss', methods=['POST'])
 def published_test_loss_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         loss = request_data['loss']
@@ -106,6 +119,7 @@ def published_test_loss_metric():
 @app.route('/total_epochs', methods=['POST'])
 def published_total_epochs_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         epochs = request_data['epochs']
@@ -116,6 +130,7 @@ def published_total_epochs_metric():
 @app.route('/current_epoch', methods=['POST'])
 def published_current_epoch_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         epoch = request_data['epoch']
@@ -126,6 +141,7 @@ def published_current_epoch_metric():
 @app.route('/last_epoch_finished_time', methods=['POST'])
 def published_last_epoch_finished_time_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         time = request_data['time']
@@ -136,6 +152,7 @@ def published_last_epoch_finished_time_metric():
 @app.route('/last_epoch_elapsed_time', methods=['POST'])
 def published_last_epoch_elapsed_time_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         time = request_data['time']
@@ -146,6 +163,7 @@ def published_last_epoch_elapsed_time_metric():
 @app.route('/total_batch_size', methods=['POST'])
 def published_total_batch_size_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         batch_size = request_data['batch_size']
@@ -156,6 +174,7 @@ def published_total_batch_size_metric():
 @app.route('/current_batch', methods=['POST'])
 def published_current_batch_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         batch_size = request_data['batch_size']
@@ -166,6 +185,7 @@ def published_current_batch_metric():
 @app.route('/model_size', methods=['POST'])
 def published_model_size_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         model_size = request_data['model_size']
@@ -176,6 +196,7 @@ def published_model_size_metric():
 @app.route('/model_params', methods=['POST'])
 def published_model_params_metric():
     request_data = request.get_json()
+    request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         params = request_data['params']
