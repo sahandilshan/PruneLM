@@ -4,26 +4,15 @@ import math
 # import time
 from train.utils import get_batch, repackage_hidden
 
-# corpus = None
-# num_tokens = None
-# train_data = None
-# total_epoch = None
-# batch_size = 256
-# sequence_length = 6
-
-# def setTrainingConfigs(corpus, num_tokens, train_data, total_epoch_size,
-#                        batch_size=256, sequence_length=6):
-#     globals = corpus
-
 
 def train(model, criterion, optimizer, num_tokens, train_data, epoch_no, epochs,
-          batch_size=256, sequence_length=6):
+          batch_size=256, sequence_length=6, client=None, model_name=None):
     # Turn on training mode which enables dropout.
     assert num_tokens is not None
     model.train()
     total_loss = 0.
-    loop = tqdm(enumerate(range(0, train_data.size(0) - 1, sequence_length)), total=len(train_data) // sequence_length,
-                position=0, leave=True)
+    loop = tqdm(enumerate(range(0, train_data.size(0) - 1, sequence_length)),
+                total=len(train_data) // sequence_length, position=0, leave=True)
     counter = 0
     for batch, i in loop:
         data, targets = get_batch(train_data, i)
@@ -46,3 +35,11 @@ def train(model, criterion, optimizer, num_tokens, train_data, epoch_no, epochs,
         counter += 1
         loop.set_description(f"Epoch: [{epoch_no}/{epochs}]")
         loop.set_postfix(loss=loss.item(), ppl=math.exp(loss.item()))
+
+        if client is not None:
+            client.send_current_batch_number(model_name, data)
+            client.send_total_batch_size(model_name, len(train_data) // sequence_length)
+            # avg_train_loss = total_loss / len(train_data)
+            client.send_train_loss(model_name, loss.item())
+            client.send_train_ppl(model_name, math.exp(math.exp(loss.item())))
+
