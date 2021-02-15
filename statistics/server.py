@@ -84,7 +84,7 @@ def published_valid_loss_metric():
 
 
 @app.route('/train_ppl', methods=['POST'])
-def published_valid_ppl_metric():
+def published_train_ppl_metric():
     request_data = request.get_json()
     if request_data is not None:
         model_name = request_data['model_name']
@@ -104,7 +104,7 @@ def published_test_loss_metric():
 
 
 @app.route('/total_epochs', methods=['POST'])
-def published_valid_loss_metric():
+def published_total_epochs_metric():
     request_data = request.get_json()
     if request_data is not None:
         model_name = request_data['model_name']
@@ -114,7 +114,7 @@ def published_valid_loss_metric():
 
 
 @app.route('/current_epoch', methods=['POST'])
-def published_valid_loss_metric():
+def published_current_epoch_metric():
     request_data = request.get_json()
     if request_data is not None:
         model_name = request_data['model_name']
@@ -124,7 +124,7 @@ def published_valid_loss_metric():
 
 
 @app.route('/last_epoch_finished_time', methods=['POST'])
-def published_valid_loss_metric():
+def published_last_epoch_finished_time_metric():
     request_data = request.get_json()
     if request_data is not None:
         model_name = request_data['model_name']
@@ -134,7 +134,7 @@ def published_valid_loss_metric():
 
 
 @app.route('/last_epoch_elapsed_time', methods=['POST'])
-def published_valid_loss_metric():
+def published_last_epoch_elapsed_time_metric():
     request_data = request.get_json()
     if request_data is not None:
         model_name = request_data['model_name']
@@ -144,7 +144,7 @@ def published_valid_loss_metric():
 
 
 @app.route('/total_batch_size', methods=['POST'])
-def published_valid_loss_metric():
+def published_total_batch_size_metric():
     request_data = request.get_json()
     if request_data is not None:
         model_name = request_data['model_name']
@@ -154,7 +154,7 @@ def published_valid_loss_metric():
 
 
 @app.route('/current_batch', methods=['POST'])
-def published_valid_loss_metric():
+def published_current_batch_metric():
     request_data = request.get_json()
     if request_data is not None:
         model_name = request_data['model_name']
@@ -164,7 +164,7 @@ def published_valid_loss_metric():
 
 
 @app.route('/model_size', methods=['POST'])
-def published_valid_loss_metric():
+def published_model_size_metric():
     request_data = request.get_json()
     if request_data is not None:
         model_name = request_data['model_name']
@@ -174,7 +174,7 @@ def published_valid_loss_metric():
 
 
 @app.route('/model_params', methods=['POST'])
-def published_valid_loss_metric():
+def published_model_params_metric():
     request_data = request.get_json()
     if request_data is not None:
         model_name = request_data['model_name']
