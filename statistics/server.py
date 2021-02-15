@@ -53,8 +53,8 @@ class Metrics(object):
                                             , 'total number of parameters in a model'
                                             , ['model_name', 'pruning_type'])
         self.model_size = Gauge('prune_lm_model_size'
-                                            , 'model size'
-                                            , ['model_name', 'pruning_type'])
+                                , 'model size'
+                                , ['model_name', 'pruning_type'])
 
 
 metrics = Metrics()
