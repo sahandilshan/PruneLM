@@ -10,8 +10,8 @@ def train(model, criterion, optimizer, num_tokens, train_data, epoch_no, epochs,
     assert num_tokens is not None
     model.train()
     total_loss = 0.
-    loop = tqdm(enumerate(range(0, train_data.size(0) - 1, sequence_length)),
-                total=len(train_data) // sequence_length, position=0, leave=True)
+    loop = tqdm(enumerate(range(0, train_data.size(0) - 1, sequence_length)), total=len(train_data) // sequence_length,
+                position=0, leave=True)
     counter = 0
     for batch, i in loop:
         data, targets = get_batch(train_data, i)
