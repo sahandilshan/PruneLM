@@ -12,7 +12,7 @@ class MyHttpClient:
             "model_name": f"{model_name}"
         }
         data = json.dumps(data)
-        requests.post(url=self.url + 'init', json=data)
+        requests.post(url=self.url + '/init', json=data)
 
     def send_test_ppl(self, model_name, ppl):
         data = {
