@@ -49,6 +49,12 @@ class Metrics(object):
                                             ['model_name', 'pruning_type'])
         self.current_batch_gauge = Gauge('prune_lm_current_batch',
                                          'current batch of the epoch', ['model_name', 'pruning_type'])
+        self.total_parameters_gauge = Gauge('prune_lm_total_parameters'
+                                            , 'total number of parameters in a model'
+                                            , ['model_name', 'pruning_type'])
+        self.model_size = Gauge('prune_lm_model_size'
+                                            , 'model size'
+                                            , ['model_name', 'pruning_type'])
 
 
 metrics = Metrics()
@@ -138,7 +144,7 @@ def published_total_epochs_metric():
         model_name = request_data['model_name']
         pruning_type = request_data['pruning_type']
         epochs = request_data['epochs']
-        metrics.validation_ppl_gauge.labels(model_name, pruning_type).set(epochs)
+        metrics.total_epoch_gauge.labels(model_name, pruning_type).set(epochs)
     return 'OK'
 
 
@@ -150,7 +156,7 @@ def published_current_epoch_metric():
         model_name = request_data['model_name']
         pruning_type = request_data['pruning_type']
         epoch = request_data['epoch']
-        metrics.validation_ppl_gauge.labels(model_name, pruning_type).set(epoch)
+        metrics.current_epoch_counter.labels(model_name, pruning_type).inc()
     return 'OK'
 
 
@@ -162,7 +168,7 @@ def published_last_epoch_finished_time_metric():
         model_name = request_data['model_name']
         pruning_type = request_data['pruning_type']
         time = request_data['time']
-        metrics.validation_ppl_gauge.labels(model_name, pruning_type).set(time)
+        metrics.last_epoch_finished_gauge.labels(model_name, pruning_type).set(time)
     return 'OK'
 
 
@@ -174,32 +180,32 @@ def published_last_epoch_elapsed_time_metric():
         model_name = request_data['model_name']
         pruning_type = request_data['pruning_type']
         time = request_data['time']
-        metrics.validation_ppl_gauge.labels(model_name, pruning_type).set(time)
+        metrics.last_epoch_elapsed_time_gauge.labels(model_name, pruning_type).set(time)
     return 'OK'
 
 
-@app.route('/total_batch_size', methods=['POST'])
-def published_total_batch_size_metric():
-    request_data = request.get_json()
-    request_data = json.loads(request_data)
-    if request_data is not None:
-        model_name = request_data['model_name']
-        pruning_type = request_data['pruning_type']
-        batch_size = request_data['batch_size']
-        metrics.validation_ppl_gauge.labels(model_name, pruning_type).set(batch_size)
-    return 'OK'
-
-
-@app.route('/current_batch', methods=['POST'])
-def published_current_batch_metric():
-    request_data = request.get_json()
-    request_data = json.loads(request_data)
-    if request_data is not None:
-        model_name = request_data['model_name']
-        pruning_type = request_data['pruning_type']
-        batch_size = request_data['batch_size']
-        metrics.validation_ppl_gauge.labels(model_name, pruning_type).set(batch_size)
-    return 'OK'
+# @app.route('/total_batch_size', methods=['POST'])
+# def published_total_batch_size_metric():
+#     request_data = request.get_json()
+#     request_data = json.loads(request_data)
+#     if request_data is not None:
+#         model_name = request_data['model_name']
+#         pruning_type = request_data['pruning_type']
+#         batch_size = request_data['batch_size']
+#         metrics.validation_ppl_gauge.labels(model_name, pruning_type).set(batch_size)
+#     return 'OK'
+#
+#
+# @app.route('/current_batch', methods=['POST'])
+# def published_current_batch_metric():
+#     request_data = request.get_json()
+#     request_data = json.loads(request_data)
+#     if request_data is not None:
+#         model_name = request_data['model_name']
+#         pruning_type = request_data['pruning_type']
+#         batch_size = request_data['batch_size']
+#         metrics.validation_ppl_gauge.labels(model_name, pruning_type).set(batch_size)
+#     return 'OK'
 
 
 @app.route('/model_size', methods=['POST'])
@@ -210,7 +216,7 @@ def published_model_size_metric():
         model_name = request_data['model_name']
         pruning_type = request_data['pruning_type']
         model_size = request_data['model_size']
-        metrics.validation_ppl_gauge.labels(model_name, pruning_type).set(model_size)
+        metrics.model_size.labels(model_name, pruning_type).set(model_size)
     return 'OK'
 
 
@@ -222,7 +228,7 @@ def published_model_params_metric():
         model_name = request_data['model_name']
         pruning_type = request_data['pruning_type']
         params = request_data['params']
-        metrics.validation_ppl_gauge.labels(model_name, pruning_type).set(params)
+        metrics.total_parameters_gauge.labels(model_name, pruning_type).set(params)
     return 'OK'
 
 
