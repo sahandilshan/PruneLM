@@ -88,10 +88,10 @@ total_params = get_total_parameters_count(model)
 original_model_size = get_original_model_size(model)
 
 if STAT_ENABLED:
-    client.send_test_ppl('original', math.exp(test_loss))
-    client.send_valid_ppl('original', math.exp(val_loss))
-    client.send_model_size('original', original_model_size)
-    client.send_model_params('original', total_params)
+    client.send_test_ppl('original', PRUNING_TYPE, math.exp(test_loss))
+    client.send_valid_ppl('original', PRUNING_TYPE, math.exp(val_loss))
+    client.send_model_size('original', PRUNING_TYPE, original_model_size)
+    client.send_model_params('original', PRUNING_TYPE, total_params)
 
 # Basic Pruning
 if PRUNING_TYPE == 'basic' and PRUNING_ENABLED == 'true':
@@ -121,9 +121,9 @@ if PRUNING_TYPE == 'basic' and PRUNING_ENABLED == 'true':
               'test ppl {:8.2f}'.format(test_loss, math.exp(test_loss)))
         print('-' * 89)
         if STAT_ENABLED:
-            client.init_pruned_model(model_name)
-            client.send_valid_ppl(model_name, math.exp(val_loss))
-            client.send_test_ppl(model_name, math.exp(test_loss))
+            client.init_pruned_model(model_name, PRUNING_TYPE)
+            client.send_valid_ppl(model_name, PRUNING_TYPE, math.exp(val_loss))
+            client.send_test_ppl(model_name, PRUNING_TYPE, math.exp(test_loss))
 
 # Iterative Pruning
 elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
@@ -142,11 +142,11 @@ elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
         model_name = 'pruned_model_' + str(percentage) + '.ckpt'
         path = MODEL_SAVING_PATH + '/' + model_name
         if STAT_ENABLED:
-            client.init_pruned_model(model_name)
-            client.send_total_epoch_size(model_name, EPOCHS)
+            client.init_pruned_model(model_name, PRUNING_TYPE)
+            client.send_total_epoch_size(model_name, PRUNING_TYPE, EPOCHS)
         for epoch in range(1, EPOCHS + 1):
             if STAT_ENABLED:
-                client.send_current_epoch_number(model_name, epoch)
+                client.send_current_epoch_number(model_name, PRUNING_TYPE, epoch)
             epoch_start_time = time.time()
             train_loss = train(prunedModel, prune_criterion, prune_optimizer, NUM_TOKENS, TRAIN_SET,
                                epoch, EPOCHS, batch_size=BATCH_SIZE, sequence_length=SEQUENCE_LENGTH)
@@ -171,12 +171,12 @@ elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
                     print('Model not saving....')
 
             if STAT_ENABLED:
-                client.send_valid_loss(model_name, val_loss)
-                client.send_valid_ppl(model_name, math.exp(val_loss))
-                client.send_train_loss(model_name, train_loss)
-                client.send_train_ppl(model_name, math.exp(train_loss))
-                client.send_last_epoch_elapsed_time(model_name, elapsed_time)
-                client.send_last_epoch_finished_time(model_name, epoch_end_time)
+                client.send_valid_loss(model_name, PRUNING_TYPE, val_loss)
+                client.send_valid_ppl(model_name, PRUNING_TYPE, math.exp(val_loss))
+                client.send_train_loss(model_name, PRUNING_TYPE, train_loss)
+                client.send_train_ppl(model_name, PRUNING_TYPE, math.exp(train_loss))
+                client.send_last_epoch_elapsed_time(model_name, PRUNING_TYPE, elapsed_time)
+                client.send_last_epoch_finished_time(model_name, PRUNING_TYPE, epoch_end_time)
 
         if MODEL_SAVING_TYPE == 'last':
             torch.save(prunedModel.state_dict(), path)
@@ -200,9 +200,9 @@ for file in os.listdir(MODEL_SAVING_PATH):
         show_model_size_stats(original_model_size, pruned_model_size)
         print('-' * 100 + '\n')
         if STAT_ENABLED:
-            client.send_test_ppl(file, math.exp(test_loss))
-            client.send_valid_ppl(file, math.exp(val_loss))
-            client.send_model_size(file, pruned_model_size)
-            client.send_model_params(file, pruned_model_params)
+            # client.send_test_ppl(file, PRUNING_TYPE, math.exp(test_loss))
+            # client.send_valid_ppl(file, PRUNING_TYPE, math.exp(val_loss))
+            client.send_model_size(file, PRUNING_TYPE, pruned_model_size)
+            client.send_model_params(file, PRUNING_TYPE, pruned_model_params)
 
 print('done')
