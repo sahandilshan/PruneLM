@@ -40,7 +40,7 @@ class Metrics(object):
         self.last_epoch_elapsed_time_gauge = Gauge('prune_lm_last_epoch_elapsed',
                                                    'elapsed time of the last epoch',
                                                    ['model_name', 'pruning_type'])
-        self.current_epoch_counter = Counter('prune_lm_current_epoch', 'current epoch',
+        self.current_epoch_counter = Gauge('prune_lm_current_epoch', 'current epoch',
                                              ['model_name', 'pruning_type'])
         self.total_epoch_gauge = Gauge('prune_lm_total_epoch', 'total epoch size',
                                        ['model_name', 'pruning_type'])
@@ -156,7 +156,7 @@ def published_current_epoch_metric():
         model_name = request_data['model_name']
         pruning_type = request_data['pruning_type']
         epoch = request_data['epoch']
-        metrics.current_epoch_counter.labels(model_name, pruning_type).inc()
+        metrics.current_epoch_counter.labels(model_name, pruning_type).set(epoch)
     return 'OK'
 
 
