@@ -7,7 +7,6 @@ import torch
 from data.dataset import get_dataset
 from model.bi_lstm_lm import Bi_LSTM_Model, get_criterion, get_optimizer
 from prune.prune import Prune
-from statistics.server import start_prometheus_client
 from train.train import train
 from train.utils import evaluate
 from utils.parameters import get_total_parameters_count, get_pruned_parameters_count
@@ -45,7 +44,7 @@ print(f'Prune Type: {PRUNING_TYPE}, Percentage(s): {PERCENTAGES}')
 STAT_ENABLED = stat_configs['enable']
 STAT_ENABLED = True if STAT_ENABLED == 'true' else False
 SERVER_URL = stat_configs['server_url']
-PROMETHEUS_PORT = stat_configs['prometheus_port']
+# PROMETHEUS_PORT = stat_configs['prometheus_port']
 client = None
 if STAT_ENABLED:
     client = MyHttpClient(SERVER_URL)
@@ -89,7 +88,6 @@ total_params = get_total_parameters_count(model)
 original_model_size = get_original_model_size(model)
 
 if STAT_ENABLED:
-    start_prometheus_client(PROMETHEUS_PORT)
     client.send_test_ppl('original', math.exp(test_loss))
     client.send_valid_ppl('original', math.exp(val_loss))
     client.send_model_size('original', original_model_size)
@@ -118,7 +116,7 @@ if PRUNING_TYPE == 'basic' and PRUNING_ENABLED == 'true':
                              BATCH_SIZE, SEQUENCE_LENGTH)
         # print('-' * 89)
         print('| valid loss {:5.2f} | '
-              'valid ppl {:8.2f}'.format(test_loss, math.exp(test_loss)))
+              'valid ppl {:8.2f}'.format(val_loss, math.exp(val_loss)))
         print('| test loss {:5.2f} | '
               'test ppl {:8.2f}'.format(test_loss, math.exp(test_loss)))
         print('-' * 89)
@@ -150,9 +148,8 @@ elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
             if STAT_ENABLED:
                 client.send_current_epoch_number(model_name, epoch)
             epoch_start_time = time.time()
-            train(prunedModel, prune_criterion, prune_optimizer, NUM_TOKENS, TRAIN_SET, epoch, EPOCHS,
-                  batch_size=BATCH_SIZE, sequence_length=SEQUENCE_LENGTH,
-                  client=client, model_name=model_name)
+            train_loss = train(prunedModel, prune_criterion, prune_optimizer, NUM_TOKENS, TRAIN_SET,
+                               epoch, EPOCHS, batch_size=BATCH_SIZE, sequence_length=SEQUENCE_LENGTH)
             prune = Prune(prunedModel, percentage)
             pruned_state_dic = prune.modelPruning()
             prunedModel.load_state_dict(pruned_state_dic)
@@ -176,6 +173,8 @@ elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
             if STAT_ENABLED:
                 client.send_valid_loss(model_name, val_loss)
                 client.send_valid_ppl(model_name, math.exp(val_loss))
+                client.send_train_loss(model_name, train_loss)
+                client.send_train_ppl(model_name, math.exp(train_loss))
                 client.send_last_epoch_elapsed_time(model_name, elapsed_time)
                 client.send_last_epoch_finished_time(model_name, epoch_end_time)
 
