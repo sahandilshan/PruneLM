@@ -25,7 +25,9 @@ class Metrics(object):
         self.test_ppl_gauge = Gauge('prune_lm_test_ppl',
                                     'show test perplexity', ['model_name', 'pruning_type'])
         self.validation_ppl_gauge = Gauge('prune_lm_valid_ppl',
-                                          'show test perplexity', ['model_name', 'pruning_type'])
+                                          'show valid perplexity', ['model_name', 'pruning_type'])
+        self.validation_ppl_final_gauge = Gauge('prune_lm_valid_ppl_final',
+                                                'show test perplexity', ['model_name', 'pruning_type'])
         self.valid_loss_gauge = Gauge('prune_lm_valid_loss',
                                       'validation loss of current epoch',
                                       ['model_name', 'pruning_type'])
@@ -101,14 +103,14 @@ def published_valid_ppl_metric():
 
 
 @app.route('/valid_ppl_final', methods=['POST'])
-def published_final_valid_ppl_metric():  # this metrics is only used with iterative prunning
+def published_final_valid_ppl_metric():  # this metrics is only used with iterative pruning
     request_data = request.get_json()
     request_data = json.loads(request_data)
     if request_data is not None:
         model_name = request_data['model_name']
         pruning_type = request_data['pruning_type']
         ppl = request_data['ppl']
-        metrics.validation_ppl_gauge.labels(model_name, pruning_type).set(ppl)
+        metrics.validation_ppl_final_gauge.labels(model_name, pruning_type).set(ppl)
     return 'OK'
 
 
