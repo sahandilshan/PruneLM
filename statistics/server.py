@@ -101,7 +101,7 @@ def published_valid_ppl_metric():
 
 
 @app.route('/valid_ppl_final', methods=['POST'])
-def published_valid_ppl_metric():
+def published_final_valid_ppl_metric():  # this metrics is only used with iterative prunning
     request_data = request.get_json()
     request_data = json.loads(request_data)
     if request_data is not None:
