@@ -33,6 +33,15 @@ class MyHttpClient:
         data = json.dumps(data)
         requests.post(url=self.url + '/valid_ppl', json=data)
 
+    def send_final_valid_ppl(self, model_name, pruning_type, ppl):
+        data = {
+            "model_name": f"{model_name}",
+            "pruning_type": f"{pruning_type}",
+            "ppl": ppl
+        }
+        data = json.dumps(data)
+        requests.post(url=self.url + '/valid_ppl_final', json=data)
+
     def send_valid_loss(self, model_name, pruning_type, loss):
         data = {
             "model_name": f"{model_name}",

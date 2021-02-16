@@ -189,6 +189,13 @@ elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
         show_parameters_stats(total_params, pruned_model_params)
         print('-' * 100 + '\n')
 
+        if STAT_ENABLED:
+            prunedModel.load_model(path)
+            test_loss = evaluate(TEST_SET, prunedModel, prune_criterion, NUM_TOKENS,
+                                 BATCH_SIZE, SEQUENCE_LENGTH)
+            client.send_test_ppl(model_name, PRUNING_TYPE, math.exp(test_loss))
+            client.send_final_valid_ppl(model_name, PRUNING_TYPE, math.exp(val_loss))
+
 # Compression stat
 for file in os.listdir(MODEL_SAVING_PATH):
     if file.endswith(".ckpt"):

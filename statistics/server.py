@@ -41,7 +41,7 @@ class Metrics(object):
                                                    'elapsed time of the last epoch',
                                                    ['model_name', 'pruning_type'])
         self.current_epoch_counter = Gauge('prune_lm_current_epoch', 'current epoch',
-                                             ['model_name', 'pruning_type'])
+                                           ['model_name', 'pruning_type'])
         self.total_epoch_gauge = Gauge('prune_lm_total_epoch', 'total epoch size',
                                        ['model_name', 'pruning_type'])
         self.total_batch_size_gauge = Gauge('prune_lm_total_batch_size',
@@ -89,6 +89,18 @@ def published_test_ppl_metric():
 
 
 @app.route('/valid_ppl', methods=['POST'])
+def published_valid_ppl_metric():
+    request_data = request.get_json()
+    request_data = json.loads(request_data)
+    if request_data is not None:
+        model_name = request_data['model_name']
+        pruning_type = request_data['pruning_type']
+        ppl = request_data['ppl']
+        metrics.validation_ppl_gauge.labels(model_name, pruning_type).set(ppl)
+    return 'OK'
+
+
+@app.route('/valid_ppl_final', methods=['POST'])
 def published_valid_ppl_metric():
     request_data = request.get_json()
     request_data = json.loads(request_data)
