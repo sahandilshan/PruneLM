@@ -1,5 +1,3 @@
-import math
-
 import requests
 import json
 
@@ -21,7 +19,7 @@ class MyHttpClient:
         data = {
             "model_name": f"{model_name}",
             "pruning_type": f"{pruning_type}",
-            "ppl": math.exp(ppl)
+            "ppl": ppl
         }
         data = json.dumps(data)
         requests.post(url=self.url + '/test_ppl', json=data)
@@ -30,7 +28,7 @@ class MyHttpClient:
         data = {
             "model_name": f"{model_name}",
             "pruning_type": f"{pruning_type}",
-            "ppl": math.exp(ppl)
+            "ppl": ppl
         }
         data = json.dumps(data)
         requests.post(url=self.url + '/valid_ppl', json=data)
@@ -48,7 +46,7 @@ class MyHttpClient:
         data = {
             "model_name": f"{model_name}",
             "pruning_type": f"{pruning_type}",
-            "ppl": math.exp(ppl)
+            "ppl": ppl
         }
         data = json.dumps(data)
         requests.post(url=self.url + '/train_ppl', json=data)
