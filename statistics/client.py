@@ -127,7 +127,7 @@ class MyHttpClient:
         data = {
             "model_name": f"{model_name}",
             "pruning_type": f"{pruning_type}",
-            "model_size": model_size
+            "model_size": float(model_size)
         }
         data = json.dumps(data)
         requests.post(url=self.url + '/model_size', json=data)
