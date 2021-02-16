@@ -86,12 +86,12 @@ print('| test loss {:5.2f} | '
 print('-' * 100)
 
 total_params = get_total_parameters_count(model)
-original_model_size = get_original_model_size(model)
+original_model_size, original_model_size_bits = get_original_model_size(model)
 
 if STAT_ENABLED:
     client.send_test_ppl('original', PRUNING_TYPE, math.exp(test_loss))
     client.send_valid_ppl('original', PRUNING_TYPE, math.exp(val_loss))
-    client.send_model_size('original', PRUNING_TYPE, original_model_size)
+    client.send_model_size('original', PRUNING_TYPE, original_model_size_bits)
     client.send_model_params('original', PRUNING_TYPE, total_params)
 
 # Basic Pruning
@@ -122,11 +122,11 @@ if PRUNING_TYPE == 'basic' and PRUNING_ENABLED == 'true':
               'test ppl {:8.2f}'.format(test_loss, math.exp(test_loss)))
         print('-' * 89)
         if STAT_ENABLED:
-            pruned_model_size = get_pruned_model_size(prunedModel)
+            pruned_model_size, pruned_model_size_bits = get_pruned_model_size(prunedModel)
             client.init_pruned_model(model_name, PRUNING_TYPE)
             client.send_valid_ppl(model_name, PRUNING_TYPE, math.exp(val_loss))
             client.send_test_ppl(model_name, PRUNING_TYPE, math.exp(test_loss))
-            client.send_model_size(model_name, PRUNING_TYPE, pruned_model_size)
+            client.send_model_size(model_name, PRUNING_TYPE, pruned_model_size_bits)
             client.send_model_params(model_name, PRUNING_TYPE, pruned_model_params)
 
 # Iterative Pruning
@@ -203,7 +203,7 @@ for file in os.listdir(MODEL_SAVING_PATH):
         pruned_model = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                                      hidden_dims=HIDDEN_DIMS, num_layers=2, dropout=DROPOUT)
         pruned_model.load_model(path)
-        pruned_model_size = get_pruned_model_size(pruned_model)
+        pruned_model_size, pruned_model_size_bits = get_pruned_model_size(pruned_model)
         print('-' * 37, file, '-' * 38)
         pruned_model_params = get_pruned_parameters_count(pruned_model)
         show_parameters_stats(total_params, pruned_model_params)
@@ -213,7 +213,7 @@ for file in os.listdir(MODEL_SAVING_PATH):
         if STAT_ENABLED:
             # client.send_test_ppl(file, PRUNING_TYPE, math.exp(test_loss))
             # client.send_valid_ppl(file, PRUNING_TYPE, math.exp(val_loss))
-            client.send_model_size(file, PRUNING_TYPE, pruned_model_size)
+            client.send_model_size(file, PRUNING_TYPE, pruned_model_size_bits)
             client.send_model_params(file, PRUNING_TYPE, pruned_model_params)
 
 print('done')

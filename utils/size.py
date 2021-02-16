@@ -28,7 +28,7 @@ def get_original_model_size(model):
         bits = dtype2bits[param_tensor.dtype]
         tensor_size *= bits
         total_model_size += tensor_size
-    return round(total_model_size / 8388608, 2)  # 8388608 = 8 * 1024 * 1024
+    return round(total_model_size / 8388608, 2), total_model_size  # 8388608 = 8 * 1024 * 1024
 
 
 def get_pruned_model_size(pruned_model):
@@ -38,4 +38,4 @@ def get_pruned_model_size(pruned_model):
         bits = dtype2bits[tensor.dtype]
         nz *= bits
         nonzero_params += nz
-    return round(nonzero_params / 8388608, 2)  # 8388608 = 8 * 1024 * 1024
+    return round(nonzero_params / 8388608, 2), nonzero_params  # 8388608 = 8 * 1024 * 1024
