@@ -19,8 +19,9 @@ config.read('./configs/pruningConfigs.cfg')
 prune_configs = dict(config.items('Prune Configs'))
 model_load_configs = dict(config.items('Model Loading Configs'))
 stat_configs = dict(config.items('Statistics Configs'))
-print(prune_configs)
-print(model_load_configs)
+print('Prune Configs:', prune_configs)
+print('Model Load Configs:', model_load_configs)
+print('Statistics Configs', stat_configs)
 
 # Save Pruning Configs
 PRUNING_ENABLED = prune_configs['enable']
@@ -121,9 +122,12 @@ if PRUNING_TYPE == 'basic' and PRUNING_ENABLED == 'true':
               'test ppl {:8.2f}'.format(test_loss, math.exp(test_loss)))
         print('-' * 89)
         if STAT_ENABLED:
+            pruned_model_size = get_pruned_model_size(prunedModel)
             client.init_pruned_model(model_name, PRUNING_TYPE)
             client.send_valid_ppl(model_name, PRUNING_TYPE, math.exp(val_loss))
             client.send_test_ppl(model_name, PRUNING_TYPE, math.exp(test_loss))
+            client.send_model_size(model_name, PRUNING_TYPE, pruned_model_size)
+            client.send_model_params(model_name, PRUNING_TYPE, pruned_model_params)
 
 # Iterative Pruning
 elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
