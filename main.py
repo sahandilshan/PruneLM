@@ -145,12 +145,11 @@ elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
         prunedModel.load_state_dict(pruned_state_dic)
         model_name = 'pruned_model_' + str(percentage) + '.ckpt'
         path = MODEL_SAVING_PATH + '/' + model_name
+        total_time = 0
         if STAT_ENABLED:
             client.init_pruned_model(model_name, PRUNING_TYPE)
             client.send_total_epoch_size(model_name, PRUNING_TYPE, EPOCHS)
         for epoch in range(1, EPOCHS + 1):
-            if STAT_ENABLED:
-                client.send_current_epoch_number(model_name, PRUNING_TYPE, epoch)
             epoch_start_time = time.time()
             train_loss = train(prunedModel, prune_criterion, prune_optimizer, NUM_TOKENS, TRAIN_SET,
                                epoch, EPOCHS, batch_size=BATCH_SIZE, sequence_length=SEQUENCE_LENGTH)
@@ -161,6 +160,7 @@ elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
                                 BATCH_SIZE, SEQUENCE_LENGTH)
             epoch_end_time = time.time()
             elapsed_time = epoch_end_time - epoch_start_time
+            total_time += elapsed_time
             print('-' * 70)
             print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
                   'valid ppl {:8.2f}'.format(epoch, elapsed_time,
@@ -175,12 +175,14 @@ elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
                     print('Model not saving....')
 
             if STAT_ENABLED:
+                client.send_last_epoch_number(model_name, PRUNING_TYPE, epoch)
                 client.send_valid_loss(model_name, PRUNING_TYPE, val_loss)
                 client.send_valid_ppl(model_name, PRUNING_TYPE, math.exp(val_loss))
                 client.send_train_loss(model_name, PRUNING_TYPE, train_loss)
                 client.send_train_ppl(model_name, PRUNING_TYPE, math.exp(train_loss))
                 client.send_last_epoch_elapsed_time(model_name, PRUNING_TYPE, elapsed_time)
                 client.send_last_epoch_finished_time(model_name, PRUNING_TYPE, epoch_end_time)
+                client.send_total_elapsed_time(model_name, PRUNING_TYPE, total_time)
 
         if MODEL_SAVING_TYPE == 'last':
             torch.save(prunedModel.state_dict(), path)
@@ -191,10 +193,13 @@ elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
 
         if STAT_ENABLED:
             prunedModel.load_model(path)
+            pruned_model_size = get_pruned_model_size(prunedModel)
             test_loss = evaluate(TEST_SET, prunedModel, prune_criterion, NUM_TOKENS,
                                  BATCH_SIZE, SEQUENCE_LENGTH)
             client.send_test_ppl(model_name, PRUNING_TYPE, math.exp(test_loss))
             client.send_final_valid_ppl(model_name, PRUNING_TYPE, math.exp(val_loss))
+            client.send_model_size(model_name, PRUNING_TYPE, pruned_model_size)
+            client.send_model_params(model_name, PRUNING_TYPE, pruned_model_params)
 
 # Compression stat
 for file in os.listdir(MODEL_SAVING_PATH):

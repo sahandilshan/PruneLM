@@ -78,14 +78,14 @@ class MyHttpClient:
         data = json.dumps(data)
         requests.post(url=self.url + '/total_epochs', json=data)
 
-    def send_current_epoch_number(self, model_name, pruning_type, epoch):
+    def send_last_epoch_number(self, model_name, pruning_type, epoch):
         data = {
             "model_name": f"{model_name}",
             "pruning_type": f"{pruning_type}",
             "epoch": epoch
         }
         data = json.dumps(data)
-        requests.post(url=self.url + '/current_epoch', json=data)
+        requests.post(url=self.url + '/last_epoch', json=data)
 
     def send_last_epoch_finished_time(self, model_name, pruning_type, time):
         data = {
@@ -104,6 +104,15 @@ class MyHttpClient:
         }
         data = json.dumps(data)
         requests.post(url=self.url + '/last_epoch_elapsed_time', json=data)
+
+    def send_total_elapsed_time(self, model_name, pruning_type, time):
+        data = {
+            "model_name": f"{model_name}",
+            "pruning_type": f"{pruning_type}",
+            "time": time
+        }
+        data = json.dumps(data)
+        requests.post(url=self.url + '/total_elapsed_time', json=data)
 
     # def send_total_batch_size(self, model_name, pruning_type, batch_size):
     #     data = {
