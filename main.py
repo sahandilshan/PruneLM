@@ -207,6 +207,7 @@ for file in os.listdir(MODEL_SAVING_PATH):
         path = os.path.join(MODEL_SAVING_PATH, file)
         pruned_model = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                                      hidden_dims=HIDDEN_DIMS, num_layers=2, dropout=DROPOUT)
+        pruned_model.to(DEVICE)
         pruned_model.load_model(path)
         pruned_model_size = get_pruned_model_size(pruned_model)
         print('-' * 37, file, '-' * 38)
@@ -214,11 +215,27 @@ for file in os.listdir(MODEL_SAVING_PATH):
         show_parameters_stats(total_params, pruned_model_params)
         print()
         show_model_size_stats(original_model_size, pruned_model_size)
-        print('-' * 100 + '\n')
         if STAT_ENABLED:
             # client.send_test_ppl(file, PRUNING_TYPE, math.exp(test_loss))
             # client.send_valid_ppl(file, PRUNING_TYPE, math.exp(val_loss))
             client.send_model_size(file, PRUNING_TYPE, pruned_model_size)
             client.send_model_params(file, PRUNING_TYPE, pruned_model_params)
+            if PRUNING_ENABLED != 'true':
+                client.init_pruned_model(file, PRUNING_TYPE)
+                prune_criterion = get_criterion()
+                test_loss = evaluate(TEST_SET, pruned_model, prune_criterion, NUM_TOKENS,
+                                     BATCH_SIZE, SEQUENCE_LENGTH)
+                valid_loss = evaluate(VALID_SET, pruned_model, prune_criterion, NUM_TOKENS,
+                                      BATCH_SIZE, SEQUENCE_LENGTH)
+                client.send_test_ppl(file, PRUNING_TYPE, math.exp(test_loss))
+                if PRUNING_TYPE == 'iterative':
+                    client.send_final_valid_ppl(file, PRUNING_TYPE, math.exp(valid_loss))
+                else:
+                    client.send_valid_ppl(file, PRUNING_TYPE, math.exp(valid_loss))
 
+                print('\n| valid loss {:5.2f} | '
+                      'valid ppl {:8.2f}'.format(valid_loss, math.exp(valid_loss)))
+                print('| test loss {:5.2f} | '
+                      'test ppl {:8.2f}'.format(test_loss, math.exp(test_loss)))
+        print('-' * 100 + '\n')
 print('done')
