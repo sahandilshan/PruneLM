@@ -91,6 +91,8 @@ original_model_size = get_original_model_size(model)
 if STAT_ENABLED:
     client.send_test_ppl('original', PRUNING_TYPE, math.exp(test_loss))
     client.send_valid_ppl('original', PRUNING_TYPE, math.exp(val_loss))
+    # to get show the value in overall statistics dashboard
+    client.send_final_valid_ppl('original', PRUNING_TYPE, math.exp(val_loss))
     client.send_model_size('original', PRUNING_TYPE, original_model_size)
     client.send_model_params('original', PRUNING_TYPE, total_params)
 
