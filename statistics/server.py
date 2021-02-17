@@ -45,8 +45,8 @@ class Metrics(object):
         self.total_elapsed_time = Gauge('prune_lm_total_elapsed_time',
                                         'total elapsed time to finished iterative pruning',
                                         ['model_name', 'pruning_type'])
-        self.last_epoch_counter = Gauge('prune_lm_current_epoch', 'current epoch',
-                                        ['model_name', 'pruning_type'])
+        self.last_epoch_gauge = Gauge('prune_lm_last_epoch', 'last epoch',
+                                      ['model_name', 'pruning_type'])
         self.total_epoch_gauge = Gauge('prune_lm_total_epoch', 'total epoch size',
                                        ['model_name', 'pruning_type'])
         self.total_batch_size_gauge = Gauge('prune_lm_total_batch_size',
@@ -173,7 +173,7 @@ def published_last_epoch_metric():
         model_name = request_data['model_name']
         pruning_type = request_data['pruning_type']
         epoch = request_data['epoch']
-        metrics.last_epoch_counter.labels(model_name, pruning_type).set(epoch)
+        metrics.last_epoch_gauge.labels(model_name, pruning_type).set(epoch)
     return 'OK'
 
 
@@ -190,7 +190,7 @@ def published_last_epoch_finished_time_metric():
 
 
 @app.route('/total_elapsed_time', methods=['POST'])
-def published_last_epoch_finished_time_metric():
+def published_total_elapsed_time_metric():
     request_data = request.get_json()
     request_data = json.loads(request_data)
     if request_data is not None:
