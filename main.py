@@ -198,8 +198,10 @@ elif PRUNING_TYPE == 'iterative' and PRUNING_ENABLED == 'true':
             pruned_model_size = get_pruned_model_size(prunedModel)
             test_loss = evaluate(TEST_SET, prunedModel, prune_criterion, NUM_TOKENS,
                                  BATCH_SIZE, SEQUENCE_LENGTH)
+            valid_loss = evaluate(VALID_SET, prunedModel, prune_criterion, NUM_TOKENS,
+                                  BATCH_SIZE, SEQUENCE_LENGTH)  # get the best validation loss
             client.send_test_ppl(model_name, PRUNING_TYPE, math.exp(test_loss))
-            client.send_final_valid_ppl(model_name, PRUNING_TYPE, math.exp(val_loss))
+            client.send_final_valid_ppl(model_name, PRUNING_TYPE, math.exp(valid_loss))
             client.send_model_size(model_name, PRUNING_TYPE, pruned_model_size)
             client.send_model_params(model_name, PRUNING_TYPE, pruned_model_params)
 
