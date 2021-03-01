@@ -28,10 +28,10 @@ def get_batch(source, i, sequence_length=6):
 
 
 def evaluate(data_source, model, criterion, num_tokens, batch_size, sequence_length=6):
-    model.eval()  # Stop calculating gradients
+    model.eval()  # batchnorm or dropout layers will work in eval mode
     total_loss = 0.
     hidden = model.init_hidden(batch_size)
-    with torch.no_grad():
+    with torch.no_grad(): # Stop calculating gradients
         for i in range(0, data_source.size(0) - 1, sequence_length):
             data, targets = get_batch(data_source, i, sequence_length)
             output, hidden = model(data, hidden)
