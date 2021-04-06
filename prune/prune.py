@@ -7,7 +7,6 @@ class Prune:
         self.model = model
         self.percentage = percentage * 0.01
         self.threshold = self.__calculateThreshold()
-        # print(self.percentage)
 
     def __flattenParams(self):
         state_dictionary = self.model.state_dict()
@@ -31,6 +30,4 @@ class Prune:
             if 'weight' in k:  # skip bias
                 w = state_dictionary[k]
                 state_dictionary[k] = w * (w.abs() > self.threshold)
-        # print(f'Threshold: {self.threshold}')
-        # print(f'Model pruned from {self.threshold * 100}%')
         return state_dictionary
