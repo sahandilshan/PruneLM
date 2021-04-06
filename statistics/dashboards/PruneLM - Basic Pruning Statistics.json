@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 4,
-  "iteration": 1613650893416,
+  "iteration": 1617701493007,
   "links": [],
   "panels": [
     {
@@ -569,12 +569,16 @@
                 "value": null
               },
               {
-                "color": "#EAB839",
-                "value": 2
+                "color": "red",
+                "value": -500000000
               },
               {
-                "color": "red",
-                "value": 5
+                "color": "#EAB839",
+                "value": -2
+              },
+              {
+                "color": "dark-green",
+                "value": 0
               }
             ]
           }
@@ -606,7 +610,7 @@
       "pluginVersion": "7.4.0",
       "targets": [
         {
-          "expr": "prune_lm_valid_ppl{model_name=~\"$model_name\",pruning_type=\"basic\"} - ignoring(model_name)prune_lm_valid_ppl{model_name=\"original\",pruning_type=\"basic\"}",
+          "expr": "prune_lm_valid_ppl{model_name=\"original\",pruning_type=\"basic\"} - ignoring(model_name)prune_lm_valid_ppl{model_name=~\"$model_name\",pruning_type=\"basic\"}",
           "instant": true,
           "interval": "",
           "legendFormat": "",
@@ -760,12 +764,16 @@
                 "value": null
               },
               {
-                "color": "#EAB839",
-                "value": 2
+                "color": "red",
+                "value": -500000000000
               },
               {
-                "color": "red",
-                "value": 5
+                "color": "#EAB839",
+                "value": -2
+              },
+              {
+                "color": "dark-green",
+                "value": 0
               }
             ]
           }
@@ -797,7 +805,7 @@
       "pluginVersion": "7.4.0",
       "targets": [
         {
-          "expr": "prune_lm_test_ppl{model_name=~\"$model_name\",pruning_type=\"basic\"} - ignoring(model_name)prune_lm_test_ppl{model_name=\"original\",pruning_type=\"basic\"}",
+          "expr": "prune_lm_test_ppl{model_name=\"original\",pruning_type=\"basic\"} - ignoring(model_name)prune_lm_test_ppl{model_name=~\"$model_name\",pruning_type=\"basic\"}",
           "instant": true,
           "interval": "",
           "legendFormat": "",
@@ -817,14 +825,32 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "pruned_model_50.ckpt",
           "value": "pruned_model_50.ckpt"
         },
         "datasource": null,
         "definition": "label_values(prune_lm_pruned_model_total{pruning_type=~\"basic\"}, model_name)",
         "description": null,
-        "error": null,
+        "error": {
+          "config": {
+            "headers": {
+              "X-Grafana-Org-Id": 1
+            },
+            "hideFromInspector": true,
+            "method": "GET",
+            "retry": 0,
+            "url": "api/datasources/proxy/1/api/v1/series?match%5B%5D=prune_lm_pruned_model_total%7Bpruning_type%3D%7E%22basic%22%7D&start=1617679891&end=1617701491"
+          },
+          "data": {
+            "error": "Bad Gateway",
+            "message": "Bad Gateway",
+            "response": ""
+          },
+          "message": "Bad Gateway",
+          "status": 502,
+          "statusText": "Bad Gateway"
+        },
         "hide": 0,
         "includeAll": false,
         "label": "Model Name",
@@ -855,5 +881,5 @@
   "timezone": "",
   "title": "PruneLM - Basic Pruning Statistics",
   "uid": "E0jQRaPMz",
-  "version": 19
+  "version": 23
 }

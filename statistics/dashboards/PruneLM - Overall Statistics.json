@@ -21,21 +21,22 @@
       "icon": "dashboard",
       "tags": [],
       "targetBlank": true,
-      "title": "PruneLm - Iterative Pruning Statistics",
+      "title": "PruneLM - Iterative Pruning Statistics",
       "type": "link",
       "url": "/d/ZjDkmaEMk/prunelm-iterative-pruning-statistics?orgId=1&refresh=5s"
     },
     {
-      "icon": "external link",
+      "icon": "dashboard",
       "tags": [],
       "targetBlank": true,
-      "title": "PruneLm - Basic Pruning Statistics",
+      "title": "PruneLM - Basic Pruning Statistics",
       "type": "link",
       "url": "/d/E0jQRaPMz/prunelm-basic-pruning-statistics?orgId=1&refresh=5s"
     }
   ],
   "panels": [
     {
+      "collapsed": false,
       "datasource": null,
       "gridPos": {
         "h": 1,
@@ -44,6 +45,7 @@
         "y": 0
       },
       "id": 6,
+      "panels": [],
       "title": "Iterative Pruning",
       "type": "row"
     },
@@ -259,7 +261,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Panel Title",
+      "title": "Iterative Pruning Stat",
       "transformations": [
         {
           "id": "seriesToColumns",
@@ -509,7 +511,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Panel Title",
+      "title": "Basic Pruning Stat",
       "transformations": [
         {
           "id": "seriesToColumns",
@@ -542,12 +544,12 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "PruneLM - Overall Statistics",
   "uid": "KH0sdXPGz",
-  "version": 6
+  "version": 12
 }

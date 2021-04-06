@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 5,
-  "iteration": 1613650890956,
+  "iteration": 1617701374766,
   "links": [],
   "panels": [
     {
@@ -619,7 +619,7 @@
     },
     {
       "datasource": null,
-      "description": "Show the perplexity difference between pruned model and the original model, If the difference < 0 (less than 0) then that's mean pruned model perform better than the original model",
+      "description": "Show the perplexity difference between pruned model and the original model, If the difference < 0 (less than 0) then that's mean pruned model perform worse than the original model.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -644,12 +644,16 @@
                 "value": null
               },
               {
-                "color": "#EAB839",
-                "value": 2
+                "color": "red",
+                "value": -1000
               },
               {
-                "color": "red",
-                "value": 5
+                "color": "#EAB839",
+                "value": -2
+              },
+              {
+                "color": "dark-green",
+                "value": 0
               }
             ]
           }
@@ -681,7 +685,8 @@
       "pluginVersion": "7.4.0",
       "targets": [
         {
-          "expr": "prune_lm_valid_ppl_final{model_name=~\"$model_name\",pruning_type=\"iterative\"} - ignoring(model_name)prune_lm_valid_ppl{model_name=\"original\",pruning_type=\"iterative\"}",
+          "expr": "prune_lm_valid_ppl{model_name=\"original\",pruning_type=\"iterative\"} - ignoring(model_name)prune_lm_valid_ppl_final{model_name=~\"$model_name\",pruning_type=\"iterative\"}",
+          "hide": false,
           "instant": true,
           "interval": "",
           "legendFormat": "",
@@ -828,7 +833,7 @@
     },
     {
       "datasource": null,
-      "description": "Show the perplexity difference between pruned model and the original model (with the testing dataset), If the difference < 0 (less than 0) then that's mean pruned model perform even better than the original model",
+      "description": "Show the perplexity difference between pruned model and the original model (with the testing dataset), If the difference < 0 (less than 0) then that's mean pruned model perform worse than the original model",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -853,12 +858,16 @@
                 "value": null
               },
               {
-                "color": "#EAB839",
-                "value": 2
+                "color": "red",
+                "value": -1000
               },
               {
-                "color": "red",
-                "value": 5
+                "color": "#EAB839",
+                "value": -2
+              },
+              {
+                "color": "dark-green",
+                "value": 0
               }
             ]
           }
@@ -890,7 +899,7 @@
       "pluginVersion": "7.4.0",
       "targets": [
         {
-          "expr": "prune_lm_test_ppl{model_name=~\"$model_name\",pruning_type=\"iterative\"} - ignoring(model_name)prune_lm_test_ppl{model_name=\"original\",pruning_type=\"iterative\"}",
+          "expr": "prune_lm_test_ppl{model_name=\"original\",pruning_type=\"iterative\"} - ignoring(model_name)prune_lm_test_ppl{model_name=~\"$model_name\",pruning_type=\"iterative\"}",
           "instant": true,
           "interval": "",
           "legendFormat": "",
@@ -997,7 +1006,6 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:54",
           "decimals": null,
           "format": "short",
           "label": null,
@@ -1007,7 +1015,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:55",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -1102,7 +1109,6 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:83",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -1111,7 +1117,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:84",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -1558,14 +1563,33 @@
       {
         "allValue": null,
         "current": {
+          "isNone": true,
           "selected": false,
-          "text": "pruned_model_60.ckpt",
-          "value": "pruned_model_60.ckpt"
+          "text": "None",
+          "value": ""
         },
         "datasource": null,
         "definition": "label_values(prune_lm_pruned_model_total{pruning_type=~\"iterative\"}, model_name)",
         "description": null,
-        "error": null,
+        "error": {
+          "config": {
+            "headers": {
+              "X-Grafana-Org-Id": 1
+            },
+            "hideFromInspector": true,
+            "method": "GET",
+            "retry": 0,
+            "url": "api/datasources/proxy/1/api/v1/series?match%5B%5D=prune_lm_pruned_model_total%7Bpruning_type%3D%7E%22iterative%22%7D&start=1617701072&end=1617701372"
+          },
+          "data": {
+            "error": "Bad Gateway",
+            "message": "Bad Gateway",
+            "response": ""
+          },
+          "message": "Bad Gateway",
+          "status": 502,
+          "statusText": "Bad Gateway"
+        },
         "hide": 0,
         "includeAll": false,
         "label": "Model Name",
@@ -1596,5 +1620,5 @@
   "timezone": "",
   "title": "PruneLM - Iterative Pruning Statistics",
   "uid": "ZjDkmaEMk",
-  "version": 36
+  "version": 43
 }
