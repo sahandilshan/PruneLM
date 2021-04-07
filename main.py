@@ -210,7 +210,8 @@ for file in os.listdir(MODEL_SAVING_PATH):
     if file.endswith(".ckpt"):
         path = os.path.join(MODEL_SAVING_PATH, file)
         pruned_model = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
-                                     hidden_dims=HIDDEN_DIMS, num_layers=2, dropout=DROPOUT)
+                                     hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS,
+                                     dropout=DROPOUT)
         pruned_model.to(DEVICE)
         pruned_model.load_model(path)
         pruned_model_size = get_pruned_model_size(pruned_model)
@@ -220,8 +221,6 @@ for file in os.listdir(MODEL_SAVING_PATH):
         print()
         show_model_size_stats(original_model_size, pruned_model_size)
         if STAT_ENABLED:
-            # client.send_test_ppl(file, PRUNING_TYPE, math.exp(test_loss))
-            # client.send_valid_ppl(file, PRUNING_TYPE, math.exp(val_loss))
             client.send_model_size(file, PRUNING_TYPE, pruned_model_size)
             client.send_model_params(file, PRUNING_TYPE, pruned_model_params)
             if PRUNING_ENABLED != 'true':
