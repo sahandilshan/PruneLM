@@ -241,4 +241,5 @@ for file in os.listdir(MODEL_SAVING_PATH):
                 print('| test loss {:5.2f} | '
                       'test ppl {:8.2f}'.format(test_loss, math.exp(test_loss)))
         print('-' * 100 + '\n')
-print('done')
+
+print('Complete Execution')
