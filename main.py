@@ -13,14 +13,16 @@ from utils.parameters import get_total_parameters_count, get_pruned_parameters_c
 from utils.show_stat import show_parameters_stats, show_model_size_stats
 from utils.size import get_original_model_size, get_pruned_model_size
 from statistics.statistics_sender import MyHttpClient
+from utils.validate_configs import validate_configs
 
 config = configparser.RawConfigParser()
 config.read('./configs/PruneLM.cfg')
+validate_configs(config)
 prune_configs = dict(config.items('Prune Configs'))
-model_load_configs = dict(config.items('Model Loading Configs'))
+model_configs = dict(config.items('Model Configs'))
 stat_configs = dict(config.items('Statistics Configs'))
 print('Prune Configs:', prune_configs)
-print('Model Load Configs:', model_load_configs)
+print('Model Load Configs:', model_configs)
 print('Statistics Configs', stat_configs)
 
 # Save Pruning Configs
@@ -51,16 +53,16 @@ if STAT_ENABLED:
     client = MyHttpClient(SERVER_URL)
 
 # Loading the model
-DEVICE = model_load_configs['device']
-NUM_TOKENS = int(model_load_configs['tokens'])
-BATCH_SIZE = int(model_load_configs['batch_size'])
-SEQUENCE_LENGTH = int(model_load_configs['sequence_length'])
-EMBEDDING_DIMS = int(model_load_configs['embedding_dims'])
-HIDDEN_DIMS = int(model_load_configs['hidden_dims'])
-NUM_LAYERS = int(model_load_configs['num_stacked_rnn'])
-DROPOUT = float(model_load_configs['dropout'])
-PATH_TO_STATE_DIC = model_load_configs['model_path']
-MODEL_SAVING_TYPE = model_load_configs.get('model_saving_type', 'best')
+DEVICE = model_configs['device']
+NUM_TOKENS = int(model_configs['tokens'])
+BATCH_SIZE = int(model_configs['batch_size'])
+SEQUENCE_LENGTH = int(model_configs['sequence_length'])
+EMBEDDING_DIMS = int(model_configs['embedding_dims'])
+HIDDEN_DIMS = int(model_configs['hidden_dims'])
+NUM_LAYERS = int(model_configs['num_stacked_rnn'])
+DROPOUT = float(model_configs['dropout'])
+PATH_TO_STATE_DIC = model_configs['model_path']
+MODEL_SAVING_TYPE = model_configs.get('model_saving_type', 'best')
 model = Bi_LSTM_Model(vocab_size=NUM_TOKENS, embedding_dims=EMBEDDING_DIMS,
                       hidden_dims=HIDDEN_DIMS, num_layers=NUM_LAYERS, dropout=DROPOUT)
 model.load_model(PATH_TO_STATE_DIC)
