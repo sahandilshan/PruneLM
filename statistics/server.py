@@ -7,7 +7,7 @@ from prometheus_client import Gauge, Counter, start_http_server
 app = Flask('Pruning Statistics')
 
 config = configparser.RawConfigParser()
-config.read('../configs/pruningConfigs.cfg')
+config.read('../configs/PruneLM.cfg')
 stat_configs = dict(config.items('Prometheus Configs'))
 
 

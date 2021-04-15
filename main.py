@@ -15,7 +15,7 @@ from utils.size import get_original_model_size, get_pruned_model_size
 from statistics.client import MyHttpClient
 
 config = configparser.RawConfigParser()
-config.read('./configs/pruningConfigs.cfg')
+config.read('./configs/PruneLM.cfg')
 prune_configs = dict(config.items('Prune Configs'))
 model_load_configs = dict(config.items('Model Loading Configs'))
 stat_configs = dict(config.items('Statistics Configs'))
