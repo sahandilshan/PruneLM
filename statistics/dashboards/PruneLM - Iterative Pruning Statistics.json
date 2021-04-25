@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 5,
-  "iteration": 1617701374766,
+  "iteration": 1619349871570,
   "links": [],
   "panels": [
     {
@@ -486,6 +486,7 @@
     },
     {
       "datasource": null,
+      "description": "The perplexity of the ***Original Language Model*** with the validation dataset.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -546,6 +547,7 @@
     },
     {
       "datasource": null,
+      "description": "The perplexity of the ***Compressed (Pruned) Language*** Model with the validation dataset.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -619,7 +621,7 @@
     },
     {
       "datasource": null,
-      "description": "Show the perplexity difference between pruned model and the original model, If the difference < 0 (less than 0) then that's mean pruned model perform worse than the original model.",
+      "description": "Show the perplexity difference between pruned model and the original model, If the difference > 0 (greater than 0) then that's means pruned model perform worse than the original model.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -833,7 +835,7 @@
     },
     {
       "datasource": null,
-      "description": "Show the perplexity difference between pruned model and the original model (with the testing dataset), If the difference < 0 (less than 0) then that's mean pruned model perform worse than the original model",
+      "description": "Show the perplexity difference between pruned model and the original model (with the testing dataset), If the difference > 0 (greater than 0) then that's mean pruned model perform worse than the original model",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1579,7 +1581,7 @@
             "hideFromInspector": true,
             "method": "GET",
             "retry": 0,
-            "url": "api/datasources/proxy/1/api/v1/series?match%5B%5D=prune_lm_pruned_model_total%7Bpruning_type%3D%7E%22iterative%22%7D&start=1617701072&end=1617701372"
+            "url": "api/datasources/proxy/1/api/v1/series?match%5B%5D=prune_lm_pruned_model_total%7Bpruning_type%3D%7E%22iterative%22%7D&start=1619349568&end=1619349868"
           },
           "data": {
             "error": "Bad Gateway",
@@ -1620,5 +1622,5 @@
   "timezone": "",
   "title": "PruneLM - Iterative Pruning Statistics",
   "uid": "ZjDkmaEMk",
-  "version": 43
+  "version": 45
 }
